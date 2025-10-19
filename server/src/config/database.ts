@@ -1,11 +1,24 @@
 import { PrismaClient } from '@prisma/client';
-import { logger } from '../utils/logger';
+import { logger } from './logger';
 
 const prisma = new PrismaClient({
   log: [
-    { emit: 'event', level: 'query' },
-    { emit: 'event', level: 'error' },
-    { emit: 'event', level: 'warn' },
+    {
+      emit: 'event',
+      level: 'query',
+    },
+    {
+      emit: 'event',
+      level: 'error',
+    },
+    {
+      emit: 'event',
+      level: 'info',
+    },
+    {
+      emit: 'event',
+      level: 'warn',
+    },
   ],
 });
 
@@ -18,27 +31,23 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 prisma.$on('error', (e: any) => {
-  logger.error('Database error:', e);
+  logger.error(`Database error: ${e.message}`);
 });
 
-prisma.$on('warn', (e: any) => {
-  logger.warn('Database warning:', e);
-});
-
-export const connectDatabase = async () => {
-  try {
-    await prisma.$connect();
+// Test database connection
+prisma.$connect()
+  .then(() => {
     logger.info('✅ Database connected successfully');
-  } catch (error) {
+  })
+  .catch((error) => {
     logger.error('❌ Database connection failed:', error);
     process.exit(1);
-  }
-};
+  });
 
-export const disconnectDatabase = async () => {
+// Graceful shutdown
+process.on('beforeExit', async () => {
   await prisma.$disconnect();
-  logger.info('Database disconnected');
-};
+  logger.info('Database connection closed');
+});
 
 export { prisma };
-export default prisma;
