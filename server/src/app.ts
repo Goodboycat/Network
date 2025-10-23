@@ -9,6 +9,10 @@ import { generalLimiter } from './middleware/rateLimit';
 
 // Import routes
 import authRoutes from './routes/auth.routes';
+import userRoutes from './routes/user.routes';
+import postRoutes from './routes/post.routes';
+import messageRoutes from './routes/message.routes';
+import notificationRoutes from './routes/notification.routes';
 
 export const createApp = (): Application => {
   const app = express();
@@ -60,7 +64,10 @@ export const createApp = (): Application => {
 
   // API routes
   app.use('/api/v1/auth', authRoutes);
-  // More routes will be added here
+  app.use('/api/v1/users', userRoutes);
+  app.use('/api/v1/posts', postRoutes);
+  app.use('/api/v1/messages', messageRoutes);
+  app.use('/api/v1/notifications', notificationRoutes);
 
   // 404 handler
   app.use(notFoundHandler);
